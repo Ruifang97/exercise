@@ -1,0 +1,70 @@
+import pandas as pd
+
+def calculate_demographic_data(print_data=True):
+    # Read data from file
+    df = pd.read_csv('C:/Users/10041960e/Desktop/E-Learning/Python/Project/Project2_age,workclass,fnlwgt,education,educ.txt', delimiter=',')
+    print("Shape of the DataFrame:",df.shape)
+    print("Headers: ",df.dtypes)
+
+#print a line spacing for better readability
+    print()
+# How many of each race are represented in this dataset? This should be a Pandas series with race names as the index labels.
+    race_count = df['race'].value_counts()
+    print("Race count: ",race_count)
+
+#print a line spacing for better readability
+    print()
+
+# What is the average age of men?
+    average_age_men = df[df['sex'] == 'Male']['age'].mean()
+    print("Average age of men: ", round(average_age_men,1))
+
+#print a line spacing for better readability
+    print()
+
+# What is the percentage of people who have a Bachelor's degree?
+    total = len(df)
+    bachelors_count = (df['education'] == 'Bachelors').sum()
+    percentage_bachelors = round((bachelors_count / total) * 100, 1)
+    print(f"Percentage of people who have a Bachelor's degree: {percentage_bachelors}%")
+
+# What percentage of people with advanced education (`Bachelors`, `Masters`, or `Doctorate`) make more than 50K?
+    advanced_df = df[df['education'].isin(['Bachelors', 'Masters', 'Doctorate'])]
+    high_earners = advanced_df[advanced_df['salary'] == '>50K']
+    percentage_high_earners = round((len(high_earners) / len(advanced_df)) * 100, 1)
+    print(f"Percentage of people with advanced education earning >50K: {percentage_high_earners}%")
+
+# What percentage of people without advanced education make more than 50K?
+    inadvanced_df = df[~df['education'].isin(['Bachelors', 'Masters', 'Doctorate'])]
+    inadvanced_high_earners = inadvanced_df[inadvanced_df['salary'] == '>50K']
+    percentage_inadvanced_high_earners = round((len(inadvanced_high_earners) / len(inadvanced_df)) * 100, 1)
+    print(f"Percentage of people without advanced education make more than 50K: {percentage_inadvanced_high_earners}%")
+
+#What is the minimum number of hours a person works per week?
+    min_hours_per_week = (df['hours-per-week']).min()
+    print("Minimum number of hours a person works per week: ",min_hours_per_week)
+
+# What percentage of the people who work the minimum number of hours per week have a salary of >50K?
+    work_min_hour_df= df[df['hours-per-week'] == min_hours_per_week]
+    min_hour_high_earner = work_min_hour_df[work_min_hour_df['salary'] == '>50K']
+    percentage_min_hour_high_earner = round((len(min_hour_high_earner) / len(work_min_hour_df)) * 100, 1)
+    print(f"Percentage of people who work the minimum number of hours per week have a salary of >50K:  {percentage_min_hour_high_earner}%")
+
+# What country has the highest percentage of people that earn >50K and what is that percentage?
+    country_stats = (
+    df.groupby('native-country')['salary']
+    .apply(lambda x: (x == '>50K').mean() * 100)
+    .reset_index(name='percentage_gt_50K'))
+
+    top_country = country_stats.loc[country_stats['percentage_gt_50K'].idxmax()]
+
+    print(f"Country with highest percentage of people that earn >50K: {top_country['native-country']}")
+    print(f"Percentage: {top_country['percentage_gt_50K']:.2f}%")
+  
+
+# Identify the most popular occupation for those who earn >50K in India.
+    filtered_data = df[(df['salary'] == '>50K') & (df['native-country'] == 'India')]
+    most_popular_occupation = filtered_data['occupation'].value_counts().idxmax()
+    print(f"The most popular occupation for those earning >50K in India is: {most_popular_occupation}")
+
+calculate_demographic_data()
